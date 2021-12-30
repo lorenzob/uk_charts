@@ -72,7 +72,7 @@ for reg_id in range(1, 23):
 
 
 	#regione = "Italia"
-	#casi = casi[-7500:]
+	casi = casi[-340:]
 
 
 	num_casi = casi.groupby(['data']).sum().reset_index()
