@@ -32,28 +32,28 @@ subtitles = {
 "Italia": "",
 }
 
+all_data = None
+for f in files:
 
-for reg_id in range(1, 23):	
+	print(f)
 
-	all_data = None
-	for f in files:
+	data = pd.read_csv(f, encoding="ISO-8859-1") 
 
-		print(f)
-
-		data = pd.read_csv(f, encoding="ISO-8859-1") 
-
-		if all_data is None:
-			all_data = data
-		else:
-			all_data = all_data.append(data)
+	if all_data is None:
+		all_data = data
+	else:
+		all_data = all_data.append(data)
 
 
-	all_data.drop_duplicates(keep='first', inplace=True) 
-	all_data.sort_values(by=['data'])
+all_data.drop_duplicates(keep='first', inplace=True) 
+all_data.sort_values(by=['data'])
 
+
+
+for reg_id in range(0, 23):	
 
 	filtra_regione = reg_id
-	if filtra_regione:
+	if filtra_regione > 0:
 		is_regione = all_data['codice_regione'] == filtra_regione	
 
 		print(all_data[is_regione])
@@ -71,8 +71,11 @@ for reg_id in range(1, 23):
 	casi = casi[['data','tamponi_test_molecolare', 'tamponi_test_antigenico_rapido', 'totale_positivi_test_molecolare', 'totale_positivi_test_antigenico_rapido']]
 
 
-	#regione = "Italia"
-	casi = casi[-340:]
+	if filtra_regione > 0:
+		casi = casi[-340:]
+	else:
+		regione = "Italia"
+		casi = casi[-7200:]
 
 
 	num_casi = casi.groupby(['data']).sum().reset_index()
@@ -117,8 +120,9 @@ for reg_id in range(1, 23):
 	plt.axvline(x=161, color="green", linewidth=0.5, alpha=0.5, linestyle='--', label="1 luglio (EU GP)")
 	plt.axvline(x=267, color="purple", linewidth=0.5, alpha=0.5, linestyle='--', label="15 ottobre (GP)")	# 15 ottobre
 	plt.axvline(x=319, color="red", linewidth=0.5, alpha=0.5, linestyle='--', label="6 dicembre (SGP)")	# 6 dicembre
+	plt.axvline(x=330, color="gray", linewidth=0.5, alpha=0.5, linestyle='--', label="25 dicembre")
 
-	plt.xticks(size = 8, fontsize = 5)
+	plt.xticks(fontsize = 5)
 	plt.yticks(fontsize = 5)
 
 	locator=MaxNLocator(prune='both', nbins=25)
@@ -126,21 +130,25 @@ for reg_id in range(1, 23):
 
 	ax2=ax.twinx()
 	#plt.axhline(y=0, linewidth=0.5, alpha=0.5, color='black', label="0% positivi")
+	print("pos", regione, num_casi['perc_positivi_m'].max())
 	num_casi.plot(kind='line', x='data', y='perc_positivi_m', color='#0343df', linewidth=1, ax=ax2, label="% molecolari positivi")
 	num_casi.plot(kind='line', x='data', y='perc_positivi_ag', color='firebrick', linewidth=1, ax=ax2, label="% antigenici positivi")
 
 	ax2.grid(axis='y', linewidth=0.5, alpha=0.6)
-	ax2.set_ylim([-2.5, 25])
+	ax2.set_ylim([-2.5, 100])
 	ax2.set_ylabel('positives %', fontsize = 8)
 	plt.yticks(fontsize = 5)
 
 	from textwrap import wrap
 	plt.suptitle(regione)
 	subtitle = subtitles.get(regione, "Missing...")
-	plt.title('\n'.join(wrap(subtitle, 220)), fontsize=6)
+	#plt.title('\n'.join(wrap(subtitle, 220)), fontsize=6)
 
 	ax.legend(loc='upper left', fontsize = 6) 
 	ax2.legend(loc='upper center', fontsize = 6) 
+
+	from datetime import date
+	plt.text(340, -2, f"({str(date.today())})", fontsize = 4)
 
 	plt.tight_layout()
 
