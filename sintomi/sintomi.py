@@ -34,7 +34,7 @@ all_data['CASI'] = all_data['CASI'].astype(int)
 all_data['iss_date'] = pd.to_datetime(all_data['iss_date']).dt.date
 
 ages = ['10-19', '20-29', '30-39', '40-49', '50-59', '60-69', '70-79', '80-89', '>90', 'Non noto']
-ages = ['all']
+#ages = ['all']
 
 all_dates = pd.DataFrame(all_data['iss_date'].unique(), columns=['_data'])
 stati = pd.DataFrame(all_data['STATO_CLINICO'].unique(), columns=['_stato'])
