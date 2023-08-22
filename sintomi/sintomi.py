@@ -13,7 +13,8 @@ for f in files:
 	print(f)
 
 	dpf = lambda s: datetime.datetime.strptime(s,'%d/%m/%Y')
-	data = pd.read_csv(f + '/stato_clinico.csv', parse_dates=['iss_date'], date_parser=dpf, encoding="ISO-8859-1") 
+	#data = pd.read_csv(f + '/stato_clinico.csv', parse_dates=['iss_date'], date_parser=dpf, encoding="ISO-8859-1") 
+	data = pd.read_excel(f, sheet_name='stato_clinico', parse_dates=['iss_date'], date_parser=dpf) 
 
 	if all_data is None:
 		all_data = data
@@ -47,9 +48,9 @@ stati = pd.DataFrame(all_data['STATO_CLINICO'].unique(), columns=['_stato'])
 oct_15_idx = all_dates.index[all_dates['_data']=='2021-10-15'].tolist()[0]
 print("oct_15_idx", oct_15_idx)
 
-aug_27_idx = all_dates.index[all_dates['_data']=='2021-08-27'].tolist()[0]
-aug_2_idx = all_dates.index[all_dates['_data']=='2021-08-02'].tolist()[0]
-giu_11_idx = all_dates.index[all_dates['_data']=='2021-06-11'].tolist()[0]
+#aug_27_idx = all_dates.index[all_dates['_data']=='2021-08-27'].tolist()[0]
+#aug_2_idx = all_dates.index[all_dates['_data']=='2021-08-02'].tolist()[0]
+#giu_11_idx = all_dates.index[all_dates['_data']=='2021-06-11'].tolist()[0]
 
 all_dates['_data'] = pd.to_datetime(all_dates['_data']).dt.date
 
@@ -68,7 +69,8 @@ print(ages)
 
 interp = True
 MA = False
-perc = not True
+lievi_e_gravi = True
+perc = True
 sex = None #'F'
 for age in ages:
 
@@ -97,8 +99,10 @@ for age in ages:
 	print(df)
 
 	# sort columns
-	df = df[[('CASI', 'ASINTOMATICO'), ('CASI', 'PAUCI-SINTOMATICO'), ('CASI', 'LIEVE'), ('CASI', 'SEVERO'), ('CASI', 'CRITICO')]]
-	#df = df[[('CASI', 'SEVERO')]]
+	if lievi_e_gravi:
+		df = df[[('CASI', 'ASINTOMATICO'), ('CASI', 'PAUCI-SINTOMATICO'), ('CASI', 'LIEVE'), ('CASI', 'SEVERO'), ('CASI', 'CRITICO')]]
+	else:
+		df = df[[('CASI', 'SEVERO'), ('CASI', 'CRITICO')]]
 
 	if interp:
 		df =df.interpolate()
@@ -109,9 +113,10 @@ for age in ages:
 	if MA:
 		df = df.rolling(axis=0, window=30).mean()
 
-	df[('CASI_PERC', 'ASINTOMATICO')] = 100 * df[('CASI',      'ASINTOMATICO')] / df['CASI'].sum(axis=1)
-	df[('CASI_PERC', 'PAUCI-SINTOMATICO')] = 100 * df[('CASI',      'PAUCI-SINTOMATICO')] / df['CASI'].sum(axis=1)
-	df[('CASI_PERC', 'LIEVE')] = 100 * df[('CASI',      'LIEVE')] / df['CASI'].sum(axis=1)
+	if lievi_e_gravi:
+		df[('CASI_PERC', 'ASINTOMATICO')] = 100 * df[('CASI',      'ASINTOMATICO')] / df['CASI'].sum(axis=1)
+		df[('CASI_PERC', 'PAUCI-SINTOMATICO')] = 100 * df[('CASI',      'PAUCI-SINTOMATICO')] / df['CASI'].sum(axis=1)
+		df[('CASI_PERC', 'LIEVE')] = 100 * df[('CASI',      'LIEVE')] / df['CASI'].sum(axis=1)
 	df[('CASI_PERC', 'SEVERO')] = 100 * df[('CASI',      'SEVERO')] / df['CASI'].sum(axis=1)
 	df[('CASI_PERC', 'CRITICO')] = 100 * df[('CASI',      'CRITICO')] / df['CASI'].sum(axis=1)
 
@@ -120,7 +125,13 @@ for age in ages:
 
 	idx_name = 'CASI_PERC' if perc else 'CASI'
 
-	ax = df.plot(y=idx_name, kind='bar', stacked=True, width=1, color=['#1a926e', '#0058b3', '#e8c547', '#fa8334', '#b92d0a'], figsize=(10,6), rot=45);
+	if lievi_e_gravi:
+		colors = ['#1a926e', '#0058b3', '#e8c547', '#fa8334', '#b92d0a']
+	else:
+		colors = ['#fa8334', '#b92d0a']
+
+
+	ax = df.plot(y=idx_name, kind='bar', stacked=True, width=1, color=colors, figsize=(10,6), rot=45);
 
 	plt.xticks(fontsize = 5)
 	plt.yticks(fontsize = 5)
@@ -133,10 +144,10 @@ for age in ages:
 		ax.set_ylabel('values', fontsize = 6)
 	ax.set_xlabel(None)
 
-	plt.axvline(x=oct_15_idx, color="gray", linewidth=0.5, alpha=0.5, linestyle='--', label="15 ottobre (GP)")	# 15 ottobre
-	plt.axvline(x=aug_27_idx, color="cyan", linewidth=0.5, alpha=0.5, linestyle='--', label="27 agosto (?)")
-	plt.axvline(x=aug_2_idx, color="purple", linewidth=0.5, alpha=0.5, linestyle='--', label="2 agosto (?)")
-	plt.axvline(x=giu_11_idx, color="y", linewidth=0.5, alpha=0.5, linestyle='--', label="11 giugno (?)")
+	#plt.axvline(x=oct_15_idx, color="gray", linewidth=0.5, alpha=0.5, linestyle='--', label="15 ottobre (GP)")	# 15 ottobre
+	#plt.axvline(x=aug_27_idx, color="cyan", linewidth=0.5, alpha=0.5, linestyle='--', label="27 agosto (?)")
+	#plt.axvline(x=aug_2_idx, color="purple", linewidth=0.5, alpha=0.5, linestyle='--', label="2 agosto (?)")
+	#plt.axvline(x=giu_11_idx, color="y", linewidth=0.5, alpha=0.5, linestyle='--', label="11 giugno (?)")
 
 
 
@@ -153,6 +164,9 @@ for age in ages:
 	if perc:
 		plt.yticks(range(0, 101, 10))
 
+	#ax.set_ylim([0, 500000])
+	#plt.yticks(range(0, 500000, 50000))
+
 	title_suffix = ""
 	if sex:
 		title_suffix += f"({sex})"
@@ -164,6 +178,9 @@ for age in ages:
 
 	if sex:
 		prefix += sex + "_"
+
+	if not lievi_e_gravi:
+		prefix += "gravi_"
 
 	plt.savefig(f"charts/{prefix}sintomi_{age}.png", dpi=250) 
 

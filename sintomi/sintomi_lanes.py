@@ -14,7 +14,8 @@ for f in files:
 	print(f)
 
 	dpf = lambda s: datetime.datetime.strptime(s,'%d/%m/%Y')
-	data = pd.read_csv(f + '/stato_clinico.csv', parse_dates=['iss_date'], date_parser=dpf, encoding="ISO-8859-1") 
+	#data = pd.read_csv(f, parse_dates=['iss_date'], date_parser=dpf, encoding="ISO-8859-1") 
+	data = pd.read_excel(f, sheet_name='stato_clinico', parse_dates=['iss_date'], date_parser=dpf) 
 
 	if all_data is None:
 		all_data = data
@@ -45,12 +46,12 @@ all_dates = pd.DataFrame(all_dates, columns=['_data'])
 
 stati = pd.DataFrame(all_data['STATO_CLINICO'].unique(), columns=['_stato'])
 
-oct_15_idx = all_dates.index[all_dates['_data']=='2021-10-15'].tolist()[0]
-print("oct_15_idx", oct_15_idx)
+#oct_15_idx = all_dates.index[all_dates['_data']=='2021-10-15'].tolist()[0]
+#print("oct_15_idx", oct_15_idx)
 
-aug_27_idx = all_dates.index[all_dates['_data']=='2021-08-27'].tolist()[0]
-aug_2_idx = all_dates.index[all_dates['_data']=='2021-08-02'].tolist()[0]
-giu_11_idx = all_dates.index[all_dates['_data']=='2021-06-11'].tolist()[0]
+#aug_27_idx = all_dates.index[all_dates['_data']=='2021-08-27'].tolist()[0]
+#aug_2_idx = all_dates.index[all_dates['_data']=='2021-08-02'].tolist()[0]
+#giu_11_idx = all_dates.index[all_dates['_data']=='2021-06-11'].tolist()[0]
 
 all_dates['_data'] = pd.to_datetime(all_dates['_data']).dt.date
 

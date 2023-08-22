@@ -91,7 +91,8 @@ for reg_id in range(0, 23):
 	num_casi['perc_positivi_m'] = 100 * num_casi['nuovi_positivi_m'] / num_casi['nuovi_tamponi_m']
 	num_casi['perc_positivi_ag'] = 100 * num_casi['nuovi_positivi_ag'] / num_casi['nuovi_tamponi_ag']
 
-	num_casi = num_casi[['data', 'nuovi_tamponi_m', 'nuovi_tamponi_ag', 'perc_positivi_m', 'perc_positivi_ag']]
+	num_casi = num_casi[['data', 'nuovi_tamponi_m', 'nuovi_tamponi_ag', 'nuovi_positivi_m', 'nuovi_positivi_ag', 'perc_positivi_m', 'perc_positivi_ag']]
+	#num_casi = num_casi[['data', 'nuovi_tamponi_m', 'nuovi_tamponi_ag', 'perc_positivi_m', 'perc_positivi_ag']]
 
 	num_casi = num_casi[1:]	# discard first row with NaN diff
 
@@ -100,6 +101,7 @@ for reg_id in range(0, 23):
 	num_casi['perc_positivi_m'].replace(np.inf, 100, inplace=True)
 
 	with pd.option_context('display.max_rows', None,):
+	#	with pd.option_context('display.max_columns', None,):
 		print(num_casi)
 
 	num_casi['data'] = num_casi['data'].str.slice(0, 10)	# remove timestamp
@@ -117,10 +119,10 @@ for reg_id in range(0, 23):
 	ax.set_ylabel('number of tests', fontsize = 8)
 	ax.set_xlabel(None)
 
-	plt.axvline(x=161, color="green", linewidth=0.5, alpha=0.5, linestyle='--', label="1 luglio (EU GP)")
-	plt.axvline(x=267, color="purple", linewidth=0.5, alpha=0.5, linestyle='--', label="15 ottobre (GP)")	# 15 ottobre
-	plt.axvline(x=319, color="red", linewidth=0.5, alpha=0.5, linestyle='--', label="6 dicembre (SGP)")	# 6 dicembre
-	plt.axvline(x=330, color="gray", linewidth=0.5, alpha=0.5, linestyle='--', label="25 dicembre")
+	plt.axvline(x=num_casi.index[num_casi['data']=='2021-07-01'].tolist()[0], color="green", linewidth=0.5, alpha=0.5, linestyle='--', label="1 luglio (EU GP)")
+	plt.axvline(x=num_casi.index[num_casi['data']=='2021-10-15'].tolist()[0], color="purple", linewidth=0.5, alpha=0.5, linestyle='--', label="15 ottobre (GP)")	# 15 ottobre
+	plt.axvline(x=num_casi.index[num_casi['data']=='2021-12-06'].tolist()[0], color="red", linewidth=0.5, alpha=0.5, linestyle='--', label="6 dicembre (SGP)")	# 6 dicembre
+	plt.axvline(x=num_casi.index[num_casi['data']=='2021-12-25'].tolist()[0], color="gray", linewidth=0.5, alpha=0.5, linestyle='--', label="25 dicembre")
 
 	plt.xticks(fontsize = 5)
 	plt.yticks(fontsize = 5)
@@ -130,7 +132,7 @@ for reg_id in range(0, 23):
 
 	ax2=ax.twinx()
 	#plt.axhline(y=0, linewidth=0.5, alpha=0.5, color='black', label="0% positivi")
-	print("pos", regione, num_casi['perc_positivi_m'].max())
+	#print("pos", regione, num_casi['perc_positivi_m'].max())
 	num_casi.plot(kind='line', x='data', y='perc_positivi_m', color='#0343df', linewidth=1, ax=ax2, label="% molecolari positivi")
 	num_casi.plot(kind='line', x='data', y='perc_positivi_ag', color='firebrick', linewidth=1, ax=ax2, label="% antigenici positivi")
 
@@ -140,7 +142,7 @@ for reg_id in range(0, 23):
 	plt.yticks(fontsize = 5)
 
 	from textwrap import wrap
-	plt.suptitle(regione)
+	plt.suptitle(f"{regione} ({reg_id})")
 	subtitle = subtitles.get(regione, "Missing...")
 	#plt.title('\n'.join(wrap(subtitle, 220)), fontsize=6)
 
@@ -148,7 +150,8 @@ for reg_id in range(0, 23):
 	ax2.legend(loc='upper center', fontsize = 6) 
 
 	from datetime import date
-	plt.text(340, -2, f"({str(date.today())})", fontsize = 4)
+	#plt.text(340, -2, f"({str(date.today())})", fontsize = 4)
+	plt.text(340, -2, f"({str(all_data['data'].iloc[-1])[:10]})", fontsize = 4)
 
 	plt.tight_layout()
 

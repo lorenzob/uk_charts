@@ -1,0 +1,4 @@
+cd ../../../../github/covid19-opendata-vaccini/dati/
+git pull
+cd -
+python somministrazioni.py ../../../../github/covid19-opendata-vaccini/dati/somministrazioni-vaccini-latest.csv

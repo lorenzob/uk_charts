@@ -127,7 +127,52 @@ for dose in dosi:
 
 		plt.savefig(f"vacc_charts/{dose}/vacc_{dose}_{regione}.png", dpi=300) 
 
+		############### weekly perc
 
+		fig,ax = plt.subplots()
+
+		#ax = casi_by_date.plot(kind='bar', stacked=True, color=['#069af3', '#15b01a'], figsize=(10,6), rot=30);
+
+		# https://mokole.com/palette.html  http://phrogz.net/css/distinct-colors.html 
+		colors = ['#006400', '#00008b', '#b03060', '#ff0000', '#ffd700', '#00ff00', '#00ffff', '#ff00ff', '#6495ed', '#ffdead']
+		for age, color in zip(ages, colors):
+			print(age, color)
+			df = casi_by_date[casi_by_date['fascia_anagrafica']==age]
+
+			df = df.set_index('data_somministrazione')
+			new_index = pd.Index(dates, name="data_somministrazione")
+			df = df.reindex(new_index)
+
+
+			df[dose + "_MA"] = df[dose].rolling(window=7).mean() 
+
+			#ax.plot(df[dose + "_MA"], color=color, linewidth=0.7, label=age);
+			ax.plot(100 * df[dose + "_MA"] / pop_by_age[age], color=color, linewidth=0.7, label=age);
+
+
+		ax.set_ylabel('% somministrazioni', fontsize = 8)
+		#ax.set_xlabel(None)
+
+		#plt.axvline(x=161, color="green", linewidth=0.5, alpha=0.5, linestyle='--', label="1 luglio (EU GP)")
+		#plt.axvline(x=267, color="purple", linewidth=0.5, alpha=0.5, linestyle='--', label="15 ottobre (GP)")	# 15 ottobre
+		#plt.axvline(x=319, color="red", linewidth=0.5, alpha=0.5, linestyle='--', label="6 dicembre (SGP)")	# 6 dicembre
+
+		plt.xticks(fontsize = 5, rotation=30)
+		plt.yticks(fontsize = 5)
+
+		locator=MaxNLocator(prune='both', nbins=25)
+		ax.xaxis.set_major_locator(locator)
+
+		#from textwrap import wrap
+		plt.suptitle(f"Somministrazioni % {dose} {regione}", fontsize = 5)
+		#subtitle = subtitles.get(regione, "Missing...")
+		#plt.title('\n'.join(wrap(subtitle, 220)), fontsize=6)
+
+		ax.legend(loc='upper left', fontsize = 6) 
+
+		plt.tight_layout()
+
+		plt.savefig(f"vacc_charts/{dose}/vacc_perc_{dose}_{regione}.png", dpi=300) 
 
 		############### cumulativo
 
